@@ -61,7 +61,6 @@ namespace Desktop.Views
                 { 
                     _usuarios = await _usuarioService.GetAllAsync();
 
-
                     DataGrid.DataSource = _usuarios;
                     DataGrid.Columns["Id"].Visible = false; // Ocultar la columna Pais
                     DataGrid.Columns["IsDeleted"].Visible = false; // Ocultar la columna Eliminado
@@ -74,7 +73,7 @@ namespace Desktop.Views
                 MessageBox.Show($"Error al obtener los usuarios: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
-
+            
 
         }
 

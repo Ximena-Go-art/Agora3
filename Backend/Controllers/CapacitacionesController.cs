@@ -114,6 +114,7 @@ namespace Backend.Controllers
         [HttpPost]
         public async Task<ActionResult<Capacitacion>> PostCapacitacion(Capacitacion capacitacion)
         {
+            _context.Attach(capacitacion.TiposDeInscripciones.Select(t=> t.TipoInscripcion).ToList());
             _context.Capacitaciones.Add(capacitacion);
             await _context.SaveChangesAsync();
 
