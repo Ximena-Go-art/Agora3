@@ -12,11 +12,12 @@ namespace Service.Services
         protected readonly string _endpoint;
 
 
-        public GenericService() {
+        public GenericService()
+        {
             _httpClient = new HttpClient();
             _options = new JsonSerializerOptions() { PropertyNameCaseInsensitive = true };
             //_endpoint= Properties.Resources.UrlApi+ApiEndpoints.GetEndpoint(typeof(T).Name);
-            _endpoint = Properties.Resources.UrlApiLocal + ApiEndpoints.GetEndpoint(typeof(T).Name);//trabaja con la URL local puesto en las propiedades del service.
+            _endpoint = Properties.Resources.UrlApiLocal + ApiEndpoints.GetEndpoint(typeof(T).Name);
 
         }
         public async Task<T?> AddAsync(T? entity)
@@ -41,9 +42,9 @@ namespace Service.Services
 
         }
 
-        public async Task<List<T>?> GetAllAsync(string? filtro="")
+        public async Task<List<T>?> GetAllAsync(string? filtro = "")
         {
-            var response= await _httpClient.GetAsync($"{_endpoint}?filter={filtro}");
+            var response = await _httpClient.GetAsync($"{_endpoint}?filter={filtro}");
             var content = await response.Content.ReadAsStringAsync();
             if (!response.IsSuccessStatusCode)
             {
@@ -53,7 +54,7 @@ namespace Service.Services
 
         }
 
-        public async Task<List<T>?> GetAllDeletedsAsync(string? filtro="")
+        public async Task<List<T>?> GetAllDeletedsAsync(string? filtro = "")
         {
             var response = await _httpClient.GetAsync($"{_endpoint}/deleteds");
             var content = await response.Content.ReadAsStringAsync();
@@ -77,7 +78,7 @@ namespace Service.Services
 
         public async Task<bool> RestoreAsync(int id)
         {
-            var response = await _httpClient.PutAsync($"{_endpoint}/restore/{id}",null);
+            var response = await _httpClient.PutAsync($"{_endpoint}/restore/{id}", null);
             if (!response.IsSuccessStatusCode)
             {
                 throw new Exception($"Error al restaurar el dato: {response.StatusCode}");
@@ -87,13 +88,14 @@ namespace Service.Services
 
         public async Task<bool> UpdateAsync(T? entity)
         {
-            var idValue=entity.GetType().GetProperty("Id").GetValue(entity);
-            var response= await _httpClient.PutAsJsonAsync($"{_endpoint}/{idValue}", entity);
+            var idValue = entity.GetType().GetProperty("Id").GetValue(entity);
+            var response = await _httpClient.PutAsJsonAsync($"{_endpoint}/{idValue}", entity);
             var content = await response.Content.ReadAsStringAsync();
             if (!response.IsSuccessStatusCode)
             {
                 throw new Exception($"Hubo un problema al actualizar{response.StatusCode} - {content}");
-            } else
+            }
+            else
             {
                 return response.IsSuccessStatusCode;
             }

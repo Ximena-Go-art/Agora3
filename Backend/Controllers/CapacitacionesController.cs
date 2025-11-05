@@ -26,7 +26,7 @@ namespace Backend.Controllers
         public async Task<ActionResult<IEnumerable<Capacitacion>>> GetCapacitaciones([FromQuery] string? filter = "")
         {
             return await _context.Capacitaciones.AsNoTracking()
-                            .Include(c=> c.TiposDeInscripciones).ThenInclude(t=> t.TipoInscripcion)
+                            .Include(c => c.TiposDeInscripciones).ThenInclude(t => t.TipoInscripcion)
                             .Where(c => c.Nombre.Contains(filter, StringComparison.OrdinalIgnoreCase)
                                 || c.Detalle.Contains(filter, StringComparison.OrdinalIgnoreCase)
                                 || c.Ponente.Contains(filter, StringComparison.OrdinalIgnoreCase))
@@ -38,9 +38,9 @@ namespace Backend.Controllers
         {
             return await _context.Capacitaciones.AsNoTracking()
                                 .Include(c => c.TiposDeInscripciones).ThenInclude(t => t.TipoInscripcion)
-                                .Where(c => c.InscripcionAbierta && 
+                                .Where(c => c.InscripcionAbierta &&
                                         (c.Nombre.Contains(filter)
-                                            || c.Detalle.Contains(filter) 
+                                            || c.Detalle.Contains(filter)
                                             || c.Ponente.Contains(filter))).ToListAsync();
         }
         [HttpGet("futuras")]
@@ -48,10 +48,10 @@ namespace Backend.Controllers
         {
             return await _context.Capacitaciones.AsNoTracking()
                                 .Include(c => c.TiposDeInscripciones).ThenInclude(t => t.TipoInscripcion)
-                                .Where(c => !c.InscripcionAbierta 
-                                        && c.FechaHora.Date > DateTime.Now.Date 
-                                        && (c.Nombre.Contains(filter) 
-                                            || c.Detalle.Contains(filter) 
+                                .Where(c => !c.InscripcionAbierta
+                                        && c.FechaHora.Date > DateTime.Now.Date
+                                        && (c.Nombre.Contains(filter)
+                                            || c.Detalle.Contains(filter)
                                             || c.Ponente.Contains(filter)))
                                 .ToListAsync();
         }
@@ -87,38 +87,42 @@ namespace Backend.Controllers
             {
                 return BadRequest();
             }
-            //atachamos la entidades de tipo de inscripcion para que no intente crearlas de nuevo
+            // Attach las entidades TipoInscripcion para que no intente guardarlas nuevamente
             foreach (var tipoInscripcionCapacitacion in capacitacion.TiposDeInscripciones)
             {
                 _context.Attach(tipoInscripcionCapacitacion.TipoInscripcion);
             }
+
             var capacitacionExistente = await _context.Capacitaciones
-                                                     .AsNoTracking()
-                                                    .Include(c => c.TiposDeInscripciones)
-                                                    .FirstOrDefaultAsync(c => c.Id == capacitacion.Id);
+                                                .AsNoTracking()
+                                                .Include(c => c.TiposDeInscripciones)
+                                                .FirstOrDefaultAsync(c => c.Id == capacitacion.Id);
             if (capacitacionExistente == null)
             {
-                return NotFound("No se encontro la capacitacion que se intentaba modificar");
+                return NotFound("No se encontró la capacitación que se intentaba modificar");
             }
             var tipodeInscripcionesAEliminar = capacitacionExistente.TiposDeInscripciones
-                                                        .Where(t => !capacitacion.TiposDeInscripciones
-                                                        .Any(ti => ti.TipoInscripcionId == t.TipoInscripcionId))
-                                                        .ToList();
+                                                .Where(t => !capacitacion.TiposDeInscripciones
+                                                .Any(ti => ti.Id == t.Id))
+                                                .ToList();
             foreach (var tipoInscripcionCapacitacion in tipodeInscripcionesAEliminar)
             {
                 _context.TiposInscripcionesCapacitaciones.Remove(tipoInscripcionCapacitacion);
             }
+
             var tiposDeInscripcionesAAgregar = capacitacion.TiposDeInscripciones
-                                                    .Where(ti => !capacitacionExistente.TiposDeInscripciones
-                                                    .Any(t => t.TipoInscripcionId == ti.TipoInscripcionId))
-                                                    .ToList();
+                                                .Where(ti => !capacitacionExistente.TiposDeInscripciones
+                                                .Any(t => t.Id == ti.Id))
+                                                .ToList();
+
             foreach (var tipoInscripcionCapacitacion in tiposDeInscripcionesAAgregar)
             {
                 _context.Attach(tipoInscripcionCapacitacion.TipoInscripcion);
                 _context.TiposInscripcionesCapacitaciones.Add(tipoInscripcionCapacitacion);
             }
 
-                _context.Entry(capacitacion).State = EntityState.Modified;
+
+            _context.Entry(capacitacion).State = EntityState.Modified;
 
             try
             {

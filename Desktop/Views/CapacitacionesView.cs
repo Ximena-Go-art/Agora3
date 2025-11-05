@@ -129,13 +129,13 @@ namespace Desktop.Views
             bool successfull = false;
             try
             {
-                if (_currentCapacitacion.Id == 0) //si es mayor a 0 es porque ya existe y hay que modificar
+                if (_currentCapacitacion.Id == 0)//capacitación nueva
                 {
-                    var nuevaCapacitacion = await _capacitacionService.AddAsync(_currentCapacitacion);
-                    successfull = nuevaCapacitacion != null; //si es distinto de nulo es porque se guardo correctamente
-
+                    var nuevacapacitacion = await _capacitacionService.AddAsync(_currentCapacitacion);
+                    successfull = nuevacapacitacion != null;
                 }
-                if (_currentCapacitacion.Id > 0) //modificar capacitacion existente
+
+                if (_currentCapacitacion.Id > 0) //modificando capacitación existente
                 {
                     successfull = await _capacitacionService.UpdateAsync(_currentCapacitacion);
                 }
@@ -145,6 +145,7 @@ namespace Desktop.Views
                 MessageBox.Show($"Error al guardar la capacitación: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
+
             if (successfull)
             {
                 LabelStatusMessage.Text = $"Capacitación {_currentCapacitacion.Nombre} guardada correctamente";
@@ -160,7 +161,6 @@ namespace Desktop.Views
                 MessageBox.Show("Error al guardar la capacitación", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-        
 
         private void BtnModificar_Click(object sender, EventArgs e)
         {
@@ -175,6 +175,9 @@ namespace Desktop.Views
                 NumericCupo.Value = _currentCapacitacion.Cupo;
                 checkInscripcionAbierta.Checked = _currentCapacitacion.InscripcionAbierta;
                 GridTiposDeInscripciones.DataSource = _currentCapacitacion.TiposDeInscripciones;
+                GridTiposDeInscripciones.HideColumns("Id", "CapacitacionId", "Capacitacion", "TipoInscripcionId", "IsDeleted");
+                //mostramos la columna costo como moneda con 2 decimales
+                GridTiposDeInscripciones.Columns["Costo"].DefaultCellStyle.Format = "C2";
 
 
                 TabControl.SelectedTab = TabPageAgregarEditar;
@@ -247,6 +250,7 @@ namespace Desktop.Views
             GridTiposDeInscripciones.DataSource = _currentCapacitacion?.TiposDeInscripciones?.ToList();
             GridTiposDeInscripciones.HideColumns("Id", "CapacitacionId", "Capacitacion", "TipoInscripcionId", "IsDeleted");
             GridTiposDeInscripciones.Columns["Costo"].DefaultCellStyle.Format = "C2";
+
         }
 
         private void BtnQuitar_Click(object sender, EventArgs e)
